@@ -1,20 +1,19 @@
 import SKS from "../model/sks.js";
-import { decrypt } from "../utils/decrypt.js";
+import { decrypt } from "../utils/decSkkGen.js";
 import { sskGen } from "../utils/sskGen.js";
+import { xorDecrypt, xorEncrypt } from "../utils/xorEncrypt.js";
 
 export const acceptReq = async (req, res) => {
   try {
     const { userId, kutumbId, domain, password } = req.body;
     const user = await SKS.findOne({ userId });
     const cipherTextA2B = user.intermediateCipherText;
-    console.log("Cipher Text A2B: ", cipherTextA2B);
     const skkA2B = await decrypt(cipherTextA2B);
-    console.log("Decrypted SKKa2b: ", skkA2B);
-
     const skkB2A = await sskGen(password, kutumbId, domain);
-    const cipherTextB2AText =
-      skkA2B.toString("base64") + skkB2A.toString("base64");
-
+    const cipherTextB2AText = xorEncrypt(
+      skkA2B.toString("base64"),
+      skkB2A.toString("base64")
+    );
     const newSKSEntity = new SKS({
       userId: kutumbId,
       intermediateCipherText: cipherTextB2AText,
@@ -22,8 +21,10 @@ export const acceptReq = async (req, res) => {
     await newSKSEntity.save();
 
     const sskB = await sskGen(password, userId, domain);
-    const cipherTextB = skkA2B.toString("base64") + sskB.toString("base64");
-    console.log("cipherTextB: ", cipherTextB);
+    const cipherTextB = xorEncrypt(
+      skkA2B.toString("base64"),
+      sskB.toString("base64")
+    );
     await SKS.updateOne({ userId: userId }, { cipherText: cipherTextB });
     await SKS.updateOne(
       { userId: userId },
@@ -41,9 +42,12 @@ export const finaliseReq = async (req, res) => {
     const user = await SKS.findOne({ userId });
     const cipherTextB2A = user.intermediateCipherText;
     const skkA2B = await sskGen(password, kutumbId, domain);
-    const skkB2A = cipherTextB2A.replace(skkA2B, "");
+    const skkB2A = xorDecrypt(cipherTextB2A, skkA2B);
     const sskA = await sskGen(password, userId, domain);
-    const cipherTextA = skkB2A.toString("base64") + sskA.toString("base64");
+    const cipherTextA = xorEncrypt(
+      skkB2A.toString("base64"),
+      sskA.toString("base64")
+    );
     await SKS.updateOne({ userId: userId }, { cipherText: cipherTextA });
     await SKS.updateOne(
       { userId: userId },
