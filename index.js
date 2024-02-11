@@ -27,6 +27,6 @@ mongoose
   .catch((error) => console.error("Error connecting to MongoDB:", error));
 
 // User Routes
-// app.use("/", sksRoutes);
+app.use("/", sksRoutes);
 app.use("/kutumbReq", kutumbReqRoutes);
 app.use("/send", dsRoutes);
