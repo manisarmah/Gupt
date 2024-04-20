@@ -6,9 +6,12 @@ import dotenv from "dotenv";
 import { kutumbReqRoutes } from "./routes/kutumbReqRoutes.js";
 import { sksRoutes } from "./routes/sksRoutes.js";
 import { publicKeyGen } from "./utils/publicKeyGen.js";
+import { authenticateToken } from "./controllers/authController.js";
 import { dsRoutes } from "./routes/dsRoutes.js";
+import cookieParser from "cookie-parser";
 const app = express();
 dotenv.config();
+app.use(cookieParser());
 
 app.use(cors());
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
@@ -28,5 +31,5 @@ mongoose
 
 // User Routes
 app.use("/", sksRoutes);
-app.use("/kutumbReq", kutumbReqRoutes);
-app.use("/send", dsRoutes);
+app.use("/kutumbReq", authenticateToken, kutumbReqRoutes);
+app.use("/send", authenticateToken, dsRoutes);

@@ -8,12 +8,12 @@ export const sendMessage = async (req, res) => {
     const { userId, kutumbId, password, domain, message } = req.body;
     const user = await SKS.findOne({ userId });
     if (!user)
-      res
+      return res
         .status(404)
         .send({ message: "Users must be friends to send message" });
     const cipherTextA = user.cipherText;
     if (!cipherTextA)
-      res
+      return res
         .status(404)
         .send({ message: "Users must be friends to send message" });
     const sskA = await sskGen(password, userId, domain);
@@ -28,7 +28,7 @@ export const sendMessage = async (req, res) => {
 
     res.status(201).send({ message: "Message is successfully encrypted" });
   } catch (e) {
-    res.status(500).json({ e });
+    res.status(500).send({ e });
   }
 };
 
