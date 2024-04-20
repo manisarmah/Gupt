@@ -1,5 +1,9 @@
 import express from "express";
-import { registerUser, loginUser } from "../controllers/authController.js";
+import {
+  registerUser,
+  loginUser,
+  authenticateToken,
+} from "../controllers/authController.js";
 // import {
 //   sendRequest,
 //   //   getEncryptedKey,
@@ -13,5 +17,6 @@ router.post("/register", registerUser);
 // User Login Route
 router.post("/login", loginUser);
 
+router.get("/verifyAuth", authenticateToken);
 // router.get("/get", getEncryptedKey);
 export { router as sksRoutes };
