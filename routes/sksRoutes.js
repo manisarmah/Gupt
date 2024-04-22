@@ -3,7 +3,9 @@ import {
   registerUser,
   loginUser,
   authenticateToken,
+  logoutUser,
 } from "../controllers/authController.js";
+import getAllLoggedInUserIds from "../controllers/getAllUsers.js";
 // import {
 //   sendRequest,
 //   //   getEncryptedKey,
@@ -18,5 +20,9 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 
 router.get("/verifyAuth", authenticateToken);
+
+router.get("/allUsers", getAllLoggedInUserIds);
+
+router.post("/logout", logoutUser);
 // router.get("/get", getEncryptedKey);
 export { router as sksRoutes };

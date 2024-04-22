@@ -9,11 +9,17 @@ import { publicKeyGen } from "./utils/publicKeyGen.js";
 import { authenticateToken } from "./controllers/authController.js";
 import { dsRoutes } from "./routes/dsRoutes.js";
 import cookieParser from "cookie-parser";
+import { friendRoutes } from "./routes/friends.js";
 const app = express();
 dotenv.config();
 app.use(cookieParser());
 
-app.use(cors());
+const corsOptions = {
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST"],
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 
@@ -33,3 +39,4 @@ mongoose
 app.use("/", sksRoutes);
 app.use("/kutumbReq", authenticateToken, kutumbReqRoutes);
 app.use("/send", authenticateToken, dsRoutes);
+app.use("/req", friendRoutes);

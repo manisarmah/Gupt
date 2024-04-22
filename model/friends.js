@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const sksSchema = new mongoose.Schema({
+const friendsSchema = new mongoose.Schema({
   userId: {
     type: String,
     required: true,
@@ -9,14 +9,16 @@ const sksSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  intermediateCipherText: {
+  status: {
     type: String,
+    required: true,
   },
-  cipherText: {
+  sentBy: {
     type: String,
+    require: true,
   },
 });
 
-const SKS = mongoose.model("SKS", sksSchema);
+const Friends = mongoose.model("Friends", friendsSchema);
 
-export default SKS;
+export default Friends;
