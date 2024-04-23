@@ -15,7 +15,7 @@ dotenv.config();
 app.use(cookieParser());
 
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000", "http://localhost:3001"],
   methods: ["GET", "POST"],
   credentials: true,
 };

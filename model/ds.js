@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const dsSchema = new mongoose.Schema({
   userId: {
     type: String,
+    required:true
   },
   message: [
     {

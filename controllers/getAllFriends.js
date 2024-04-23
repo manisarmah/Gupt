@@ -23,6 +23,7 @@ export const getYetToFinaliseDetails = async (req, res) => {
     const response = await Friends.find({
       userId: id,
       sentBy: id,
+      status: "Accepted",
     });
     let kutumbs = [];
     response.forEach((ele) => {

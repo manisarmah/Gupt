@@ -52,18 +52,23 @@ export const acceptReq = async (req, res) => {
 export const finaliseReq = async (req, res) => {
   try {
     const { userId, kutumbId, domain, password } = req.body;
-    const user = await SKS.findOne({ userId });
+    console.log(userId, kutumbId, domain, password);
+    const user = await SKS.findOne({ userId, kutumbId });
     const cipherTextB2A = user.intermediateCipherText;
     const skkA2B = await sskGen(password, kutumbId, domain);
+    console.log(skkA2B);
     const skkB2A = xorDecrypt(cipherTextB2A, skkA2B);
     const sskA = await sskGen(password, userId, domain);
     const cipherTextA = xorEncrypt(
       skkB2A.toString("base64"),
       sskA.toString("base64")
     );
-    await SKS.updateOne({ userId: userId }, { cipherText: cipherTextA });
     await SKS.updateOne(
-      { userId: userId },
+      { $and: [{ userId: userId }, { kutumbId: kutumbId }] },
+      { $set: { cipherText: cipherTextA } }
+    );
+    await SKS.updateOne(
+      { $and: [{ userId: userId }, { kutumbId: kutumbId }] },
       { $unset: { intermediateCipherText: 1 } }
     );
     await Friends.updateOne(
@@ -77,7 +82,8 @@ export const finaliseReq = async (req, res) => {
     res
       .status(200)
       .json({ message: "Successful kutumb relationship!", status: "Success" });
-  } catch (e) {
-    res.status(500).json({ status: "Fail", error: e });
+  } catch (error) {
+    res.status(500).json({ status: "Fail ra", message: error });
+    console.log(error);
   }
 };

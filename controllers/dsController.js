@@ -5,17 +5,20 @@ import { xorDecrypt, xorEncrypt } from "../utils/xorEncrypt.js";
 
 export const sendMessage = async (req, res) => {
   try {
+    console.log(req.body);
     const { userId, kutumbId, password, domain, message } = req.body;
     const user = await SKS.findOne({ userId });
     if (!user)
-      return res
-        .status(404)
-        .send({ message: "Users must be friends to send message" });
+      return res.status(404).json({
+        status: "Fail",
+        message: "Users must be friends to send message",
+      });
     const cipherTextA = user.cipherText;
     if (!cipherTextA)
-      return res
-        .status(404)
-        .send({ message: "Users must be friends to send message" });
+      return res.status(404).json({
+        status: "Fail",
+        message: "Users must be friends to send message",
+      });
     const sskA = await sskGen(password, userId, domain);
     const skkB2A = xorDecrypt(cipherTextA, sskA);
     const encryptedMessage = xorEncrypt(message, skkB2A);
@@ -23,36 +26,35 @@ export const sendMessage = async (req, res) => {
       (await DS.findOne({ userId: kutumbId })) ||
       new DS({ userId: kutumbId, message: [] });
     dsEntity.message.push({ sender: userId, data: encryptedMessage });
-
     await dsEntity.save();
-
-    res.status(201).send({ message: "Message is successfully encrypted" });
+    res.status(201).json({
+      status: "Success",
+      message: "Message is successfully encrypted",
+    });
   } catch (e) {
-    res.status(500).send({ e });
+    res.status(500).json({ status: "Fail", message: e });
   }
 };
 
 export const receiveMessage = async (req, res) => {
   try {
-    const { userId, password, domain } = req.body;
+    const { userId, password, domain, sender } = req.body;
     const user = await DS.findOne({ userId });
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ message: "No messages found for the user" });
+      return res.status(404).json({ status: "Fail", message: "No such user!" });
     }
 
-    const messages = [];
+    let messages = [];
     for (const msg of user.message) {
       const kutumb = msg.sender;
       const skkB2A = await sskGen(password, kutumb, domain);
       const decryptedMessage = xorDecrypt(msg.data, skkB2A);
       messages.push({ sender: kutumb, data: decryptedMessage });
     }
-
-    res.status(200).send({ messages });
+    messages = messages.filter((msg) => msg.sender === sender);
+    res.status(200).json({ status: "Success", messages: messages });
   } catch (e) {
-    res.status(500).json({ e });
+    res.status(500).json({ status: "Fail", message: e });
   }
 };

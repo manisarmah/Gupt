@@ -5,6 +5,7 @@ export const incomingFR = async (req, res) => {
     const friends = await Friends.find({
       kutumbId: id,
       status: "Pending",
+      sentBy: { $ne: id },
     });
     let Kutumbs = [];
     friends.forEach((element) => {
